@@ -1,0 +1,9 @@
+{
+  "name": "TankGame_ClientSide",
+  "version": "0.0.0",
+  "homepage": "https://github.com/thomashed/TankGame_ClientSide",
+  "authors": [
+    "Thomas & Christopher"
+  ],
+  "license": "MIT"
+}
