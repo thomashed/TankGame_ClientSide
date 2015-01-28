@@ -7,7 +7,7 @@
 
 # Config file/assets
 node_modules
-client/vendor
+bower_components
 config.json
 
 # =========================
