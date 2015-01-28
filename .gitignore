@@ -1,1 +1,19 @@
-# This is just a test
+# Webstorm
+
+.idea
+
+*.log
+.grunt
+
+# Config file/assets
+node_modules
+client/vendor
+config.json
+
+# =========================
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
