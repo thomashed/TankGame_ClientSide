@@ -14,13 +14,13 @@ var Keys = function(up, left, right, down) {
 		switch (c) {
 			// Controls
 			case 37: // Left
-				that.left = true;
+				that.left = false;
 				break;
 			case 38: // Up
 				that.up = true;
 				break;
 			case 39: // Right
-				that.right = true; // Will take priority over the left key
+				that.right = false; // Will take priority over the left key
 				break;
 			case 40: // Down
 				that.down = true;
