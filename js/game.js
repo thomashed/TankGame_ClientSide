@@ -1,185 +1,103 @@
 /**************************************************
- ** GAME VARIABLES
- **************************************************/
+** GAME VARIABLES
+**************************************************/
 var canvas,			// Canvas DOM element
-    ctx,			// Canvas rendering context
-    keys,			// Keyboard input
-    remotePlayers,
-    localPlayer,	// Local player
-    socket;			// socket
+	ctx,			// Canvas rendering context
+	keys,			// Keyboard input
+	localPlayGround;    // Local playground
+
 
 
 /**************************************************
- ** GAME INITIALISATION
- **************************************************/
+** GAME INITIALISATION
+**************************************************/
 function init() {
-    // Declare the canvas and rendering context
-    canvas = document.getElementById("gameCanvas");
-    ctx = canvas.getContext("2d");
+	// Declare the canvas and rendering context
+	canvas = document.getElementById("gameCanvas");
+	ctx = canvas.getContext("2d");
 
-    // Maximise the canvas
-    canvas.width = 500;
-    canvas.height = 500; // window.innerHeight
+	// Maximise the canvas
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 
-    // Initialise keyboard controls
-    keys = new Keys();
+	// Initialise keyboard controls
+	keys = new Keys();
 
-    // Calculate a random start position for the local player
-    // The minus 5 (half a player size) stops the player being
-    // placed right on the egde of the screen
-    var startX = Math.round(Math.random() * (canvas.width - 5)),
-        startY = Math.round(Math.random() * (canvas.height - 5));
+	// Calculate a random start position for the local player
+	// The minus 5 (half a player size) stops the player being
+	// placed right on the egde of the screen
+	var startX = Math.round(Math.random()*(canvas.width-5)),
+		startY = Math.round(Math.random()*(canvas.height-5));
 
-    // Initialise the local player
-    localPlayer = new Player(startX, startY);
+	localPlayGround = new Playground(canvas.width, canvas.height, startX, startY);
 
-    // Start listening for events
-    socket = io.connect("http://localhost", {port: 8000, transports: ["websocket"]});
-
-    remotePlayers = [];
-    setEventHandlers();
-
+	// Start listening for events
+	setEventHandlers();
 };
 
 
 /**************************************************
- ** GAME EVENT HANDLERS
- **************************************************/
-var setEventHandlers = function () {
-    // Keyboard
-    window.addEventListener("keydown", onKeydown, false);
-    window.addEventListener("keyup", onKeyup, false);
+** GAME EVENT HANDLERS
+**************************************************/
+var setEventHandlers = function() {
+	// Keyboard
+	window.addEventListener("keydown", onKeydown, false);
+	window.addEventListener("keyup", onKeyup, false);
 
-    // Window resize
-    window.addEventListener("resize", onResize, true);
-
-    socket.on("connect", onSocketConnected);
-    socket.on("disconnect", onSocketDisconnect);
-    socket.on("new player", onNewPlayer);
-    socket.on("move player", onMovePlayer);
-    socket.on("remove player", onRemovePlayer);
-
+	// Window resize
+	window.addEventListener("resize", onResize, false);
 };
 
 // Keyboard key down
 function onKeydown(e) {
-
-    if (localPlayer) {
-        keys.onKeyDown(e);
-    }
-    ;
+	if (localPlayGround) {
+		keys.onKeyDown(e);
+	};
 };
 
 // Keyboard key up
 function onKeyup(e) {
-    if (localPlayer) {
-        keys.onKeyUp(e);
-    }
-    ;
+	if (localPlayGround) {
+		keys.onKeyUp(e);
+	};
 };
 
 // Browser window resize
 function onResize(e) {
-    // Maximise the canvas
-    canvas.width = 500;
-    canvas.height = 500;
+	// Maximise the canvas
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 };
 
-function onSocketConnected() {
-    console.log("Connected to socket server");
-
-    socket.emit("new player", {x: localPlayer.getX(), y: localPlayer.getY()});
-
-};
-
-function onSocketDisconnect() {
-    console.log("Disconnected from socket server");
-};
-
-function onNewPlayer(data) {
-    console.log("New player connected: " + data.id);
-
-    var newPlayer = new Player(data.x, data.y);
-    newPlayer.id = data.id;
-    remotePlayers.push(newPlayer);
-};
-
-function onMovePlayer(data) {
-
-    var movePlayer = playerById(data.id);
-
-    if (!movePlayer) {
-        console.log("Player not found: " + data.id);
-        return;
-    }
-    ;
-
-    movePlayer.setX(data.x);
-    movePlayer.setY(data.y);
-
-};
-
-function onRemovePlayer(data) {
-
-    var removePlayer = playerById(data.id);
-
-    if (!removePlayer) {
-        console.log("Player not found: " + data.id);
-        return;
-    }
-    ;
-
-    remotePlayers.splice(remotePlayers.indexOf(removePlayer), 1);
-
-};
 
 /**************************************************
- ** GAME ANIMATION LOOP
- **************************************************/
-function animate(time) {
+** GAME ANIMATION LOOP
+**************************************************/
+function animate() {
+	update();
+	draw();
 
-    update();
-    draw();
-
-    // Calling this function counts as your 'render loop'
-    window.requestAnimFrame(animate);
+	// Request a new animation frame using Paul Irish's shim
+	window.requestAnimFrame(animate);
 };
 
+
 /**************************************************
- ** GAME UPDATE
- **************************************************/
+** GAME UPDATE
+**************************************************/
 function update() {
-    if (localPlayer.update(keys)) { // Returns true if player has moved
-        socket.emit("move player", {x: localPlayer.getX(), y: localPlayer.getY()});
-    }
-    ;
+	localPlayGround.update(keys);
 };
 
 
 /**************************************************
- ** GAME DRAW
- **************************************************/
+** GAME DRAW
+**************************************************/
 function draw() {
-    // Wipe the canvas clean
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the local player
-    localPlayer.draw(ctx);
-
-    var i;
-    for (i = 0; i < remotePlayers.length; i++) {
-        remotePlayers[i].draw(ctx);
-    }
-    ;
-};
-
-function playerById(id) {
-    var i;
-    for (i = 0; i < remotePlayers.length; i++) {
-        if (remotePlayers[i].id == id)
-            return remotePlayers[i];
-    }
-    ;
-
-    return false;
+	// Wipe the canvas clean
+//	ctx.save();
+//	ctx.translate(0,0);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+//	ctx.restore();
+	localPlayGround.draw(ctx);
 };
