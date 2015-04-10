@@ -17,7 +17,7 @@ function init() {
 	ctx = canvas.getContext("2d");
 
 	// Maximise the canvas
-	canvas.width = window.innerWidth;
+	canvas.width = window.innerWidth*0.8;
 	canvas.height = window.innerHeight;
 
 	// Initialise keyboard controls
